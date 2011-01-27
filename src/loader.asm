@@ -7,13 +7,13 @@
 get_vesa:
 	mov ax, 4F00h
 	int 10h			; send interrupt to vesa controller
-	cmp 0, ah		; check the flag (00 success)
+	cmp ah, 0		; check the flag (00 success)
 	jne gdt			; if not success, give up
 
 	mov ax, 4F01h
 	mov cx, 106h		; test 1280x1024 at 16bit color
 	int 10h
-	cmp 4Fh, al
+	cmp al, 4Fh
 	je print_message
 	jmp gdt
 
@@ -54,24 +54,6 @@ load_gdt:
 	mov ds, ax
 	lgdt [gdt_desc]		; finally loading the GDT
 
-idt:
-interrupt_dummy:		; let's create some dummy interrupts
-	dw	0x0000
-	dw	0x10
-	dw	0x8E00
-	dw	0x20
-interrupt_two:
-	dw	0x0000
-	dw	0x10
-	dw	0x8E00
-	dw	0x30
-idt_end:
-idt_pointer:
-	dw idt_end - idt - 1
-	dd idt
-	
-load_idt:
-	lidt	[idt_pointer]
 enter_pmode:
 	mov eax, cr0		; set cr0 to 1, enabling protected mode
 	or al, 1
